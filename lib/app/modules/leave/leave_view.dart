@@ -34,20 +34,9 @@ class LeaveView extends GetView<LeaveController> {
       body: AmbientBackground(
         child: Obx(() {
           final leaves = controller.leaves;
-          final pending = leaves.where((l) => l.status == LeaveStatus.pending).length;
           return CustomScrollView(
             slivers: [
-              PageHeader(
-                title: 'Leave & location',
-                subtitle: 'Plan time off and tell the office where you work',
-                bottom: Row(
-                  children: [
-                    SummaryChip(controller.workLocation.value.label, icon: Icons.share_location_rounded),
-                    const SizedBox(width: 8),
-                    SummaryChip('$pending pending', icon: Icons.hourglass_top_rounded),
-                  ],
-                ),
-              ),
+              PageHeader(title: 'Leave & location', subtitle: 'Plan time off and tell the office where you work'),
               if (controller.isLoading.value)
                 const SliverFillRemaining(child: LoadingView())
               else

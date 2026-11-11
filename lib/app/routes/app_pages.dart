@@ -18,6 +18,7 @@ import '../modules/leave/leave_view.dart';
 import '../modules/location/location_controller.dart';
 import '../modules/location/location_view.dart';
 import '../modules/news/news_controller.dart';
+import '../modules/news/news_detail_view.dart';
 import '../modules/news/news_view.dart';
 import '../modules/notes/note_editor_controller.dart';
 import '../modules/notes/note_editor_view.dart';
