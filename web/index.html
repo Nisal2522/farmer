@@ -19,11 +19,17 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="CU Farmer: field audit companion for organic certification auditors.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#1B5E40">
+  <!--
+    Status bar colour. The id makes Flutter web update THIS tag (it looks up
+    #flutterweb-theme), so each screen can set its own colour via SystemUi.
+    Starts as the colour at the top of the login photo, not a green strip.
+  -->
+  <meta id="flutterweb-theme" name="theme-color" content="#7C948A">
   <meta name="apple-mobile-web-app-title" content="CU Farmer">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
@@ -32,8 +38,91 @@
 
   <title>CU Farmer</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Start downloading the big files right away. -->
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="assets/assets/images/login_photo.jpg" as="image">
+
+  <script>
+    // Flutter replaces the viewport meta with its own. Re-add viewport-fit=cover
+    // so the installed app can draw behind the status bar (edge-to-edge).
+    (function () {
+      function patch(meta) {
+        var c = meta.getAttribute('content') || '';
+        if (c.indexOf('viewport-fit') === -1) meta.setAttribute('content', c + ', viewport-fit=cover');
+      }
+      new MutationObserver(function () {
+        document.querySelectorAll('meta[name="viewport"]').forEach(patch);
+      }).observe(document.head, { childList: true, subtree: true, attributes: true, attributeFilter: ['content'] });
+    })();
+
+    // Safe-area insets [top, right, bottom, left] in CSS px, read by Flutter
+    // (lib/app/core/widgets/web_safe_area_web.dart) because Flutter web
+    // doesn't report them itself.
+    window.cuSafeAreaInsets = function () {
+      var probe = document.getElementById('cu-safe-area-probe');
+      if (!probe) {
+        probe = document.createElement('div');
+        probe.id = 'cu-safe-area-probe';
+        probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;visibility:hidden;pointer-events:none;' +
+          'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);';
+        document.documentElement.appendChild(probe);
+      }
+      var s = getComputedStyle(probe);
+      return [s.paddingTop, s.paddingRight, s.paddingBottom, s.paddingLeft].map(function (v) { return parseFloat(v) || 0; });
+    };
+  </script>
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #F3F6F3; }
+    html.cu-dark, html.cu-dark body { background: #0D1410; }
+
+    /*
+      Instant first paint that looks like the login screen. Chrome closes its
+      PWA splash on first paint, so this cuts the splash short; it then fades
+      out when Flutter draws its first frame.
+    */
+    #cu-boot {
+      position: fixed; inset: 0; z-index: 1;
+      background: inherit;
+      transition: opacity 250ms ease-out;
+    }
+    #cu-boot.cu-hide { opacity: 0; pointer-events: none; }
+    #cu-boot .hero {
+      position: absolute; top: 0; left: 0; right: 0; height: 52vh;
+      border-radius: 0 0 40px 40px; overflow: hidden;
+      background: #4B6D5F;
+    }
+    #cu-boot .photo {
+      position: absolute; inset: 0;
+      background: url('assets/assets/images/login_photo.jpg') 60% 50% / cover no-repeat;
+      transform: scale(1.08);  /* login photo starts zoomed, then eases to 1 */
+    }
+    #cu-boot .tint {
+      position: absolute; inset: 0;
+      background: linear-gradient(to bottom, rgba(14,59,40,.55) 0%, rgba(14,59,40,.15) 40%, rgba(14,59,40,.85) 100%);
+    }
+  </style>
 </head>
 <body>
+  <div id="cu-boot" aria-hidden="true"><div class="hero"><div class="photo"></div><div class="tint"></div></div></div>
+  <script>
+    (function () {
+      // Match the saved theme (GetStorage keeps it in localStorage).
+      try {
+        if (JSON.parse(localStorage.getItem('GetStorage') || '{}').themeMode === 'dark') {
+          document.documentElement.classList.add('cu-dark');
+        }
+      } catch (e) {}
+
+      window.addEventListener('flutter-first-frame', function () {
+        var boot = document.getElementById('cu-boot');
+        if (!boot) return;
+        boot.classList.add('cu-hide');
+        setTimeout(function () { boot.remove(); }, 300);
+      }, { once: true });
+    })();
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

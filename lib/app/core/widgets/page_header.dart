@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 
 /// Clean, pinned app bar for inner pages: title, subtitle and actions.
 /// An optional [bottom] summary (stats, chips, progress) is shown in a green
@@ -30,7 +30,7 @@ class PageHeader extends StatelessWidget {
           scrolledUnderElevation: 1,
           shadowColor: Colors.black26,
           foregroundColor: scheme.onSurface,
-          systemOverlayStyle: dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+          systemOverlayStyle: SystemUi.surface(theme.scaffoldBackgroundColor, dark: dark),
           actions: actions,
           title: Row(
             children: [

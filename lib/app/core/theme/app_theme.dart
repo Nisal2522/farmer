@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'system_ui.dart';
 
 class AppTheme {
   AppTheme._();
@@ -43,6 +44,7 @@ class AppTheme {
       scaffoldBackgroundColor: isLight ? AppColors.lightBg : AppColors.darkBg,
       visualDensity: VisualDensity.standard,
       appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUi.surface(isLight ? AppColors.lightBg : AppColors.darkBg, dark: !isLight),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,

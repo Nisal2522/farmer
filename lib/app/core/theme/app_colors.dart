@@ -30,6 +30,10 @@ class AppColors {
   static const info = slate;
   static const violet = primaryMid;
 
+  // Colour at the very top of the hero photos (status bar colour on web).
+  static const statusBarLogin = Color(0xFF7C948A);
+  static const statusBarHero = Color(0xFF4B6D5F);
+
   static const lightBg = Color(0xFFF3F6F3);
   static const darkBg = Color(0xFF0D1410);
   static const darkSurface = Color(0xFF152019);

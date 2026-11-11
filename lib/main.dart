@@ -1,10 +1,13 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 
 import 'app/core/config/app_config.dart';
+import 'app/core/theme/app_colors.dart';
 import 'app/core/theme/app_theme.dart';
+import 'app/core/widgets/web_safe_area.dart';
 import 'app/data/providers/api_client.dart';
 import 'app/data/repositories/audit_repository.dart';
 import 'app/data/repositories/mock_audit_repository.dart';
@@ -16,7 +19,11 @@ import 'app/services/theme_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  // Native: transparent bar, pages draw behind it. On web each screen sets the
+  // bar colour itself (see SystemUi), so skip this there.
+  if (!kIsWeb) {
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(statusBarColor: Colors.transparent));
+  }
 
   _registerDependencies();
   runApp(const CuFarmerApp());
@@ -42,6 +49,9 @@ class CuFarmerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: AppConfig.appName,
+      // Web: initial browser theme-color (status bar), matches the login hero.
+      color: AppColors.statusBarLogin,
+      builder: (context, child) => WebSafeArea(child: child ?? const SizedBox.shrink()),
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

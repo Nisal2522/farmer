@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/system_ui.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/surfaces.dart';
@@ -20,7 +21,7 @@ class ProfileView extends GetView<ProfileController> {
     final scheme = Theme.of(context).colorScheme;
     final home = Get.find<HomeController>();
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUi.hero,
       child: ListView(
         padding: const EdgeInsets.only(bottom: ShellView.bottomInset),
         children: [

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/system_ui.dart';
 import 'login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
@@ -15,7 +16,7 @@ class LoginView extends GetView<LoginController> {
     final scheme = Theme.of(context).colorScheme;
     final size = MediaQuery.sizeOf(context);
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: SystemUi.login,
       child: Scaffold(
         body: Column(
           children: [
