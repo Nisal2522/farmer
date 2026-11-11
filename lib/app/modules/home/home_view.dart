@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/status_colors.dart';
 import '../../core/utils/formatters.dart';
@@ -159,41 +160,11 @@ class _Header extends GetView<HomeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Top bar: brand on the left, account actions on the right.
                 Row(
                   children: [
-                    Obx(() {
-                      final user = controller.auth.user.value;
-                      return UserAvatar(
-                        name: user?.name ?? 'Auditor',
-                        photoUrl: user?.photoUrl,
-                        size: 52,
-                        ringColor: Colors.white.withValues(alpha: 0.85),
-                        fallbackColor: Colors.white,
-                      );
-                    }),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            Fmt.greeting(),
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 13),
-                          ),
-                          Obx(
-                            () => Text(
-                              controller.firstName,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    const _BrandMark(),
+                    const Spacer(),
                     Obx(
                       () => _GlassIconButton(
                         icon: Icons.notifications_none_rounded,
@@ -201,9 +172,46 @@ class _Header extends GetView<HomeController> {
                         onTap: () => Get.toNamed(Routes.news),
                       ),
                     ),
+                    const SizedBox(width: 10),
+                    Obx(() {
+                      final user = controller.auth.user.value;
+                      return Material(
+                        type: MaterialType.transparency,
+                        shape: const CircleBorder(),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: () => Get.find<ShellController>().changeTab(3),
+                          child: UserAvatar(
+                            name: user?.name ?? 'Auditor',
+                            photoUrl: user?.photoUrl,
+                            size: 46,
+                            ringColor: Colors.white.withValues(alpha: 0.85),
+                            fallbackColor: Colors.white,
+                          ),
+                        ),
+                      );
+                    }),
                   ],
                 ),
-                const SizedBox(height: 22),
+                const SizedBox(height: 24),
+                Text(
+                  Fmt.greeting(),
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Obx(
+                  () => Text(
+                    controller.firstName,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                      height: 1.15,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
                 Obx(() {
                   final next = controller.nextAudit;
                   final today = next != null && next.covers(DateTime.now());
@@ -211,12 +219,12 @@ class _Header extends GetView<HomeController> {
                     today
                         ? 'You are auditing\n${next.company} today'
                         : 'No field audit today.\nTime to catch up on uploads?',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      height: 1.25,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.92),
+                      fontSize: 17,
+                      height: 1.3,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: -0.2,
                     ),
                   );
                 }),
@@ -224,6 +232,64 @@ class _Header extends GetView<HomeController> {
                 const _SyncCard(),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// App logo + name in a frosted pill, shown at the top-left of the header.
+class _BrandMark extends StatelessWidget {
+  const _BrandMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(5, 5, 14, 5),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(11),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 8, offset: const Offset(0, 3)),
+              ],
+            ),
+            child: Image.asset('assets/images/logo.png', width: 34, height: 34, filterQuality: FilterQuality.medium),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                AppConfig.appName,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.2,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                'Field Audit',
+                style: TextStyle(
+                  color: AppColors.amber.withValues(alpha: 0.95),
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  height: 1.2,
+                ),
+              ),
+            ],
           ),
         ],
       ),
