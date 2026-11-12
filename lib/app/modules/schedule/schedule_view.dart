@@ -40,8 +40,19 @@ class ScheduleView extends GetView<ScheduleController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Schedule', style: Theme.of(context).textTheme.headlineMedium),
-                          Text(Fmt.monthYear(selected), style: TextStyle(color: scheme.onSurfaceVariant)),
+                          // Same size as the other page headers (e.g. News).
+                          Text(
+                            'Schedule',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.2),
+                          ),
+                          Text(
+                            Fmt.monthYear(selected),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w500,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
                         ],
                       ),
                     ),

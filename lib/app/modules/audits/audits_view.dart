@@ -33,12 +33,20 @@ class AuditsView extends GetView<AuditsController> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('My audits', style: Theme.of(context).textTheme.headlineMedium),
+                          // Same size as the other page headers (e.g. News).
+                          Text(
+                            'My audits',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, letterSpacing: -0.2),
+                          ),
                           Obx(() {
                             final up = controller.toUploadCount;
                             return Text(
                               '${controller.projects.length} projects · ${up == 0 ? 'all uploaded' : '$up to upload'}',
-                              style: TextStyle(color: scheme.onSurfaceVariant),
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: scheme.onSurfaceVariant,
+                              ),
                             );
                           }),
                         ],
@@ -273,7 +281,9 @@ class _SyncIcon extends StatelessWidget {
       message: tooltip,
       child: Material(
         color: on ? AppColors.amber : AppColors.amber.withValues(alpha: 0.16),
-        shape: CircleBorder(side: BorderSide(color: AppColors.amber.withValues(alpha: on ? 0 : 0.45))),
+        shape: CircleBorder(
+          side: BorderSide(color: AppColors.amber.withValues(alpha: on ? 0 : 0.45)),
+        ),
         elevation: on ? 3 : 0,
         shadowColor: AppColors.amber.withValues(alpha: 0.5),
         child: InkWell(
@@ -286,11 +296,7 @@ class _SyncIcon extends StatelessWidget {
                     padding: EdgeInsets.all(12),
                     child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.primaryDeep),
                   )
-                : Icon(
-                    icon,
-                    size: 22,
-                    color: on ? AppColors.primaryDeep : AppColors.amber.withValues(alpha: 0.7),
-                  ),
+                : Icon(icon, size: 22, color: on ? AppColors.primaryDeep : AppColors.amber.withValues(alpha: 0.7)),
           ),
         ),
       ),

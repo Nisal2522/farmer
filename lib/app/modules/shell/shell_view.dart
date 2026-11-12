@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../core/theme/system_ui.dart';
 import '../../core/widgets/surfaces.dart';
 import '../home/home_view.dart';
 import 'shell_controller.dart';
@@ -20,13 +22,20 @@ class ShellView extends GetView<ShellController> {
 }
 
 /// Frame for a section opened from Home (Audits, Schedule, Profile).
+/// Light page, so dark status bar icons (Profile sets its own over its photo).
 class SectionPage extends StatelessWidget {
   const SectionPage({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Scaffold(body: AmbientBackground(child: child));
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUi.surface(theme.scaffoldBackgroundColor, dark: theme.brightness == Brightness.dark),
+      child: Scaffold(body: AmbientBackground(child: child)),
+    );
+  }
 }
 
 /// Back to Home from a section page. Hidden when the page can't pop.
