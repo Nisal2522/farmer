@@ -229,8 +229,6 @@ class _Header extends GetView<HomeController> {
                     ),
                   );
                 }),
-                const SizedBox(height: 18),
-                const _SyncCard(),
               ],
             ),
           ),
@@ -325,88 +323,6 @@ class _GlassIconButton extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _SyncCard extends GetView<HomeController> {
-  const _SyncCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final sync = controller.sync;
-    return Obx(() {
-      final pending = sync.pendingCount.value;
-      final syncing = sync.isSyncing.value;
-      final online = sync.isOnline.value;
-      final last = sync.lastSynced.value;
-
-      final (icon, title) = syncing
-          ? (Icons.sync_rounded, 'Syncing your audit data…')
-          : !online
-          ? (Icons.cloud_off_rounded, 'Offline · $pending saved on device')
-          : pending > 0
-          ? (Icons.cloud_upload_outlined, '$pending change${pending == 1 ? '' : 's'} waiting to upload')
-          : (Icons.cloud_done_outlined, 'Everything is synced');
-
-      return Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: pending > 0 ? AppColors.warning : AppColors.mint,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: AppColors.primaryDeep, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${online ? 'Online' : 'Offline'} · ${last == null ? 'not synced yet' : 'synced ${Fmt.relative(last)}'}',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            syncing
-                ? const Padding(
-                    padding: EdgeInsets.all(8),
-                    child: SizedBox.square(
-                      dimension: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
-                    ),
-                  )
-                : FilledButton(
-                    onPressed: sync.syncNow,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primaryDeep,
-                      minimumSize: const Size(0, 40),
-                      padding: const EdgeInsets.symmetric(horizontal: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    ),
-                    child: const Text('Sync'),
-                  ),
-          ],
-        ),
-      );
-    });
   }
 }
 
