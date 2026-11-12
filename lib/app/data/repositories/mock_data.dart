@@ -54,8 +54,12 @@ class MockData {
     'p2': ['Pepper', 'Cinnamon', 'Banana', 'Mango'],
     'p3': ['Cinnamon', 'Pepper', 'Clove buds', 'Nutmeg'],
     'p4': ['Coconut', 'Mango', 'Banana', 'Moringa'],
+    'p5': ['Tea', 'Pepper', 'Cardamom', 'Banana'],
+    'p6': ['Cinnamon', 'Pepper', 'Coconut', 'Nutmeg'],
   };
 
+  /// Downloaded and not-yet-downloaded projects alternate, so the list shows
+  /// both states (and the download action) throughout.
   static List<AuditProject> projects() => [
     AuditProject(
       id: 'p1',
@@ -64,6 +68,13 @@ class MockData {
       standard: 'EU Organic · NOP',
       syncState: SyncState.synced,
       lastSynced: DateTime.now().subtract(const Duration(hours: 3)),
+    ),
+    const AuditProject(
+      id: 'p3',
+      name: 'Spice Coast Growers',
+      auditNo: 'ADT 304118',
+      standard: 'NOP · Naturland',
+      syncState: SyncState.notDownloaded,
     ),
     AuditProject(
       id: 'p2',
@@ -74,10 +85,10 @@ class MockData {
       lastSynced: DateTime.now().subtract(const Duration(days: 1)),
     ),
     const AuditProject(
-      id: 'p3',
-      name: 'Spice Coast Growers',
-      auditNo: 'ADT 304118',
-      standard: 'NOP · Naturland',
+      id: 'p5',
+      name: 'Uva Hills Smallholders',
+      auditNo: 'ADT 488250',
+      standard: 'EU Organic · Fairtrade',
       syncState: SyncState.notDownloaded,
     ),
     AuditProject(
@@ -88,12 +99,19 @@ class MockData {
       syncState: SyncState.synced,
       lastSynced: DateTime.now().subtract(const Duration(days: 4)),
     ),
+    const AuditProject(
+      id: 'p6',
+      name: 'Ruhuna Cinnamon Partners',
+      auditNo: 'ADT 552917',
+      standard: 'NOP · EU Organic',
+      syncState: SyncState.notDownloaded,
+    ),
   ];
 
   static List<Farmer> farmers() {
     _rnd = Random(7); // same data every time the repository is created
     final list = <Farmer>[];
-    const unitsPerProject = {'p1': 9, 'p2': 6, 'p3': 5, 'p4': 4};
+    const unitsPerProject = {'p1': 9, 'p2': 6, 'p3': 5, 'p4': 4, 'p5': 4, 'p6': 3};
     var cuid = 1;
     for (final entry in unitsPerProject.entries) {
       final projectId = entry.key;

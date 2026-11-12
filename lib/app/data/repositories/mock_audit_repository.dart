@@ -67,7 +67,60 @@ class MockAuditRepository implements AuditRepository {
         synced: true,
       ),
     );
+
+    // Offline work captured in the field but not uploaded yet, so "To upload"
+    // (Audits filter, Profile, Sync now) has realistic sample data.
+    final teaFarmer = _farmers.where((f) => f.projectId == 'p1').elementAt(1);
+    final valleyFarmer = _farmers.firstWhere((f) => f.projectId == 'p2');
+    _notes.addAll([
+      AuditNote(
+        id: 'note-seed-3',
+        subjectId: teaFarmer.id,
+        category: 'Soil inputs',
+        subCategory: 'Input storage',
+        type: NoteType.nonConformity,
+        text: 'Bag of synthetic urea found in the store room. Farmer says it belongs to a neighbour; '
+            'storage to be separated and checked at the next visit.',
+        createdAt: now.subtract(const Duration(hours: 2)),
+      ),
+      AuditNote(
+        id: 'note-seed-4',
+        subjectId: valleyFarmer.id,
+        category: 'Farm records',
+        type: NoteType.general,
+        text: 'Input purchase receipts for this season shown and photographed.',
+        createdAt: now.subtract(const Duration(hours: 20)),
+      ),
+      AuditNote(
+        id: 'note-seed-5',
+        subjectId: valleyFarmer.id,
+        category: 'Buffer zone / contamination prevention',
+        type: NoteType.general,
+        text: 'New 2 m buffer strip planted along the road side since the last audit.',
+        createdAt: now.subtract(const Duration(hours: 19)),
+      ),
+    ]);
+    _samples.add(
+      FieldSample(
+        id: 'sample-seed-2',
+        subjectId: teaFarmer.id,
+        product: teaFarmer.crops.first.name,
+        reason: MockData.sampleReasons.first,
+        locationDescription: MockData.sampleLocations[1],
+        cropStatus: 'Harvesting stage',
+        seals: const {
+          SampleKind.lab: SealEntry(sealNo: '142388'),
+          SampleKind.cu: SealEntry(sealNo: '139310'),
+          SampleKind.client: SealEntry(sealNo: '590611'),
+        },
+        createdAt: now.subtract(const Duration(hours: 1)),
+      ),
+    );
+    _dirtyProjects.addAll({teaFarmer.projectId, valleyFarmer.projectId});
   }
+
+  /// Records saved on the device that are not uploaded yet.
+  int get unsyncedCount => _notes.where((n) => !n.synced).length + _samples.where((s) => !s.synced).length;
 
   // ---------------------------------------------------------------------------
   // Helpers

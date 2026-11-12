@@ -278,14 +278,16 @@ class PillTabs<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      clipBehavior: Clip.none,
-      child: Row(
+    // Wraps onto a new line instead of scrolling sideways (easier for everyone).
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
         children: [
           for (final (i, v) in values.indexed)
             Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: EdgeInsets.zero,
               child: GestureDetector(
                 onTap: () => onChanged(v),
                 child: AnimatedContainer(

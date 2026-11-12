@@ -23,22 +23,6 @@ class ProjectUnitsView extends GetView<ProjectUnitsController> {
               PageHeader(
                 title: project.name,
                 subtitle: '${project.auditNo} · ${project.standard}',
-                bottom: Obx(
-                  () => Row(
-                    children: [
-                      ProgressRing(
-                        value: controller.progress,
-                        size: 52,
-                        stroke: 5,
-                        labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-                      ),
-                      const SizedBox(width: 14),
-                      HeaderStat('${controller.auditedFarmers}/${controller.totalFarmers}', 'audited'),
-                      HeaderStat('${controller.productionUnits.length}', 'units'),
-                      HeaderStat('${controller.processingUnits.length}', 'processing'),
-                    ],
-                  ),
-                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(

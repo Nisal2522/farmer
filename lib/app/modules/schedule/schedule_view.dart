@@ -31,10 +31,11 @@ class ScheduleView extends GetView<ScheduleController> {
             padding: const EdgeInsets.only(bottom: ShellView.bottomInset),
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 14),
+                padding: const EdgeInsets.fromLTRB(8, 16, 20, 14),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    const SectionBackButton(),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,

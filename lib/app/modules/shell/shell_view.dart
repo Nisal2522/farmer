@@ -1,53 +1,50 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/widgets/glass_nav_bar.dart';
 import '../../core/widgets/surfaces.dart';
-import '../audits/audits_view.dart';
 import '../home/home_view.dart';
-import '../profile/profile_view.dart';
-import '../schedule/schedule_controller.dart';
-import '../schedule/schedule_view.dart';
 import 'shell_controller.dart';
 
+/// Signed-in root: Home only. Audits, Schedule and Profile open as their own
+/// pages from the Home menu (see [ShellController]), so there is no bottom bar.
 class ShellView extends GetView<ShellController> {
   const ShellView({super.key});
 
-  /// Space pages leave at the bottom so content clears the floating nav bar.
-  static const bottomInset = 110.0;
+  /// Space pages leave at the bottom of their scroll content.
+  static const bottomInset = 32.0;
 
   @override
   Widget build(BuildContext context) {
-    final schedule = Get.find<ScheduleController>();
-    return Obx(
-      () => Scaffold(
-        extendBody: true,
-        body: AmbientBackground(
-          child: IndexedStack(
-            index: controller.index.value,
-            children: const [HomeView(), AuditsView(), ScheduleView(), ProfileView()],
-          ),
-        ),
-        bottomNavigationBar: GlassNavBar(
-          currentIndex: controller.index.value,
-          onTap: controller.changeTab,
-          items: [
-            const GlassNavItem(
-              icon: Icons.space_dashboard_outlined,
-              activeIcon: Icons.space_dashboard_rounded,
-              label: 'Home',
-            ),
-            const GlassNavItem(icon: Icons.fact_check_outlined, activeIcon: Icons.fact_check_rounded, label: 'Audits'),
-            GlassNavItem(
-              icon: Icons.event_note_outlined,
-              activeIcon: Icons.event_note_rounded,
-              label: 'Schedule',
-              badge: schedule.pendingCount,
-            ),
-            const GlassNavItem(icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, label: 'Profile'),
-          ],
-        ),
-      ),
+    return const Scaffold(body: AmbientBackground(child: HomeView()));
+  }
+}
+
+/// Frame for a section opened from Home (Audits, Schedule, Profile).
+class SectionPage extends StatelessWidget {
+  const SectionPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(body: AmbientBackground(child: child));
+}
+
+/// Back to Home from a section page. Hidden when the page can't pop.
+class SectionBackButton extends StatelessWidget {
+  const SectionBackButton({super.key, this.onPhoto = false});
+
+  /// White frosted style for use over a header photo.
+  final bool onPhoto;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!(ModalRoute.of(context)?.canPop ?? false)) return const SizedBox.shrink();
+    const icon = Icon(Icons.arrow_back_rounded);
+    if (!onPhoto) return IconButton(tooltip: 'Back', onPressed: Get.back, icon: icon);
+    return Material(
+      color: Colors.white.withValues(alpha: 0.14),
+      shape: CircleBorder(side: BorderSide(color: Colors.white.withValues(alpha: 0.18))),
+      child: IconButton(tooltip: 'Back', color: Colors.white, onPressed: Get.back, icon: icon),
     );
   }
 }

@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/action_tile.dart';
-import '../../core/widgets/app_card.dart';
 import '../../core/widgets/common.dart';
 import '../../core/widgets/page_header.dart';
 import '../../core/widgets/surfaces.dart';
@@ -27,16 +26,6 @@ class FarmerView extends GetView<FarmerController> {
               PageHeader(
                 title: f.name,
                 subtitle: '${f.code} · Plot ${f.plot} · ${f.address}',
-                actions: [
-                  IconButton(
-                    tooltip: f.isSelected ? 'Unstar' : 'Star',
-                    onPressed: controller.toggleStar,
-                    icon: Icon(
-                      f.isSelected ? Icons.star_rounded : Icons.star_outline_rounded,
-                      color: f.isSelected ? AppColors.warning : null,
-                    ),
-                  ),
-                ],
                 bottom: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -63,9 +52,8 @@ class FarmerView extends GetView<FarmerController> {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
                 sliver: SliverList.list(
                   children: [
-                    _Checklist(f).entrance(0),
-                    const SectionHeader('Audit workspace', padding: EdgeInsets.fromLTRB(4, 22, 4, 12)),
-                    _Workspace(f).entrance(1),
+                    const SectionHeader('Audit workspace', padding: EdgeInsets.fromLTRB(4, 4, 4, 12)),
+                    _Workspace(f).entrance(0),
                   ],
                 ),
               ),
@@ -93,65 +81,6 @@ class FarmerView extends GetView<FarmerController> {
         ),
       );
     });
-  }
-}
-
-/// What still needs doing for this farmer before the audit is complete.
-class _Checklist extends StatelessWidget {
-  const _Checklist(this.f);
-
-  final Farmer f;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final items = [
-      ('GPS location', f.location != null),
-      ('Field photos', f.photoCount > 0),
-      ('Audit notes', f.noteCount > 0),
-      ('Sample taken', f.sampleCount > 0),
-    ];
-    final done = items.where((i) => i.$2).length;
-    return AppCard(
-      child: Row(
-        children: [
-          ProgressRing(
-            value: done / items.length,
-            size: 64,
-            stroke: 7,
-            label: '$done/${items.length}',
-            color: done == items.length ? AppColors.success : scheme.primary,
-            labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  done == items.length ? 'Ready to sign off' : 'Audit checklist',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    for (final (label, ok) in items)
-                      StatusPill(
-                        label,
-                        color: ok ? AppColors.success : scheme.outline,
-                        icon: ok ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                        dense: true,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }
 

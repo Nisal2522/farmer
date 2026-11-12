@@ -22,32 +22,6 @@ class FarmersView extends GetView<FarmersController> {
             PageHeader(
               title: 'Unit ${controller.unit.code}',
               subtitle: controller.project.name,
-              bottom: Obx(
-                () => Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          '${controller.auditedCount}',
-                          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
-                        ),
-                        Text(
-                          ' / ${controller.farmers.length} audited',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontWeight: FontWeight.w600),
-                        ),
-                        const Spacer(),
-                        SummaryChip('${(controller.progress * 100).round()}% done', icon: Icons.insights_rounded),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(value: controller.progress, minHeight: 8),
-                    ),
-                  ],
-                ),
-              ),
             ),
             SliverPersistentHeader(pinned: true, delegate: _SearchBarDelegate(controller)),
             Obx(() {
@@ -91,9 +65,9 @@ class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
   final FarmersController controller;
 
   @override
-  double get minExtent => 124;
+  double get minExtent => 150;
   @override
-  double get maxExtent => 124;
+  double get maxExtent => 150;
 
   @override
   bool shouldRebuild(covariant _SearchBarDelegate old) => false;
@@ -103,7 +77,7 @@ class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
     final scheme = Theme.of(context).colorScheme;
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 10),
       child: Column(
         children: [
           TextField(
@@ -115,15 +89,202 @@ class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
             ),
           ),
           const SizedBox(height: 10),
-          Obx(
-            () => PillTabs<FarmerFilter>(
-              values: FarmerFilter.values,
-              selected: controller.filter.value,
-              label: (f) => '${f.label} ${controller.count(f)}',
-              onChanged: (f) => controller.filter.value = f,
+          _FilterBar(controller),
+        ],
+      ),
+    );
+  }
+}
+
+/// Filters without sideways scrolling: three big main choices plus "More",
+/// which opens a sheet with the rest. Large text and touch targets.
+class _FilterBar extends StatelessWidget {
+  const _FilterBar(this.controller);
+
+  final FarmersController controller;
+
+  static const _main = [FarmerFilter.all, FarmerFilter.pending, FarmerFilter.audited];
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Obx(() {
+      final selected = controller.filter.value;
+      final extra = _main.contains(selected) ? null : selected;
+      return Container(
+        height: 62,
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: scheme.surface,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: softShadow(context),
+        ),
+        child: Row(
+          children: [
+            for (final f in _main)
+              _Segment(
+                label: f.label,
+                count: controller.count(f),
+                selected: selected == f,
+                onTap: () => controller.filter.value = f,
+              ),
+            _Segment(
+              label: extra?.label ?? 'More',
+              count: extra == null ? null : controller.count(extra),
+              selected: extra != null,
+              trailing: Icons.expand_more_rounded,
+              onTap: () => _showMore(context),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  void _showMore(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    const more = [
+      (FarmerFilter.changed, Icons.edit_note_rounded),
+      (FarmerFilter.isNew, Icons.fiber_new_rounded),
+      (FarmerFilter.selected, Icons.star_rounded),
+      (FarmerFilter.samples, Icons.science_rounded),
+    ];
+    Get.bottomSheet(
+      SafeArea(
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          decoration: BoxDecoration(
+            color: scheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 44,
+                  height: 5,
+                  decoration: BoxDecoration(color: scheme.outlineVariant, borderRadius: BorderRadius.circular(3)),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(4, 16, 4, 8),
+                child: Text('Show farmers', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+              ),
+              for (final (f, icon) in more)
+                Obx(() {
+                  final on = controller.filter.value == f;
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Material(
+                      color: on ? scheme.primary.withValues(alpha: 0.10) : scheme.onSurface.withValues(alpha: 0.04),
+                      borderRadius: BorderRadius.circular(18),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(18),
+                        onTap: () {
+                          controller.filter.value = f;
+                          Get.back();
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 44,
+                                height: 44,
+                                decoration: BoxDecoration(
+                                  color: on ? scheme.primary : scheme.primary.withValues(alpha: 0.10),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Icon(icon, color: on ? scheme.onPrimary : scheme.primary),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(f.label, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+                              ),
+                              Text(
+                                '${controller.count(f)}',
+                                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: scheme.primary),
+                              ),
+                              const SizedBox(width: 10),
+                              Icon(
+                                on ? Icons.check_circle_rounded : Icons.circle_outlined,
+                                color: on ? scheme.primary : scheme.outlineVariant,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+}
+
+class _Segment extends StatelessWidget {
+  const _Segment({required this.label, required this.selected, required this.onTap, this.count, this.trailing});
+
+  final String label;
+  final int? count;
+  final bool selected;
+  final IconData? trailing;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final fg = selected ? scheme.onPrimary : scheme.onSurface;
+    return Expanded(
+      child: Semantics(
+        button: true,
+        selected: selected,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOutCubic,
+            decoration: BoxDecoration(
+              color: selected ? scheme.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: fg),
+                      ),
+                    ),
+                    if (trailing != null) Icon(trailing, size: 18, color: fg),
+                  ],
+                ),
+                if (count != null)
+                  Text(
+                    '$count',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                      color: selected ? scheme.onPrimary.withValues(alpha: 0.85) : scheme.primary,
+                    ),
+                  ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

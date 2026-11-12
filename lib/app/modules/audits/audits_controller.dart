@@ -6,16 +6,12 @@ import '../../data/repositories/audit_repository.dart';
 import '../../routes/app_routes.dart';
 import '../../services/sync_service.dart';
 
-enum ProjectFilter { all, toUpload, notDownloaded }
-
 class AuditsController extends GetxController {
   final _repo = Get.find<AuditRepository>();
   final sync = Get.find<SyncService>();
 
   final projects = <AuditProject>[].obs;
   final isLoading = true.obs;
-  final query = ''.obs;
-  final filter = ProjectFilter.all.obs;
   final downloading = <String>{}.obs;
 
   @override
@@ -33,24 +29,7 @@ class AuditsController extends GetxController {
     }
   }
 
-  List<AuditProject> get visible {
-    final q = query.value.trim().toLowerCase();
-    return projects.where((p) {
-      final matchesQuery = q.isEmpty || p.name.toLowerCase().contains(q) || p.auditNo.toLowerCase().contains(q);
-      final matchesFilter = switch (filter.value) {
-        ProjectFilter.all => true,
-        ProjectFilter.toUpload => p.syncState == SyncState.pendingUpload,
-        ProjectFilter.notDownloaded => p.syncState == SyncState.notDownloaded,
-      };
-      return matchesQuery && matchesFilter;
-    }).toList();
-  }
-
-  int count(ProjectFilter f) => switch (f) {
-    ProjectFilter.all => projects.length,
-    ProjectFilter.toUpload => projects.where((p) => p.syncState == SyncState.pendingUpload).length,
-    ProjectFilter.notDownloaded => projects.where((p) => p.syncState == SyncState.notDownloaded).length,
-  };
+  int get toUploadCount => projects.where((p) => p.syncState == SyncState.pendingUpload).length;
 
   Future<void> download(AuditProject project) async {
     downloading.add(project.id);

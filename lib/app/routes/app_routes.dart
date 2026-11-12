@@ -3,6 +3,9 @@ abstract class Routes {
 
   static const login = '/login';
   static const shell = '/home';
+  static const audits = '/audits';
+  static const schedule = '/schedule';
+  static const profile = '/profile';
 
   static const projectUnits = '/project';
   static const farmers = '/farmers';

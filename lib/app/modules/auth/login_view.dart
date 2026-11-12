@@ -92,37 +92,87 @@ class LoginView extends GetView<LoginController> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'Welcome, auditor',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ).animate().fadeIn(delay: 350.ms).slideY(begin: 0.3, end: 0),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Sign in with your company Microsoft account to load your audit schedule.',
-                        style: TextStyle(color: scheme.onSurfaceVariant, height: 1.45),
-                      ).animate().fadeIn(delay: 450.ms),
-                      const Spacer(),
-                      Obx(
-                        () => SizedBox(
-                          width: double.infinity,
-                          height: 56,
-                          child: FilledButton(
-                            style: FilledButton.styleFrom(
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                      Obx(() {
+                        final saved = controller.auth.offlineUser.value;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              saved == null ? 'Welcome, auditor' : 'Welcome back, ${saved.name.split(' ').first}',
+                              style: Theme.of(context).textTheme.headlineSmall,
                             ),
-                            onPressed: controller.isLoading.value ? null : controller.signIn,
-                            child: controller.isLoading.value
-                                ? const SizedBox.square(
-                                    dimension: 22,
-                                    child: CircularProgressIndicator(strokeWidth: 2.4, color: Colors.white),
-                                  )
-                                : const Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [_MicrosoftLogo(), SizedBox(width: 12), Text('Continue with Microsoft')],
-                                  ),
-                          ),
-                        ),
-                      ).animate().fadeIn(delay: 550.ms).slideY(begin: 0.3, end: 0),
+                            const SizedBox(height: 8),
+                            Text(
+                              saved == null
+                                  ? 'Sign in with your company Microsoft account to load your audit schedule.'
+                                  : 'Your account and audit data are saved on this device. '
+                                        'Continue offline, or sign in with Microsoft when you are online.',
+                              style: TextStyle(color: scheme.onSurfaceVariant, height: 1.45),
+                            ),
+                          ],
+                        );
+                      }).animate().fadeIn(delay: 350.ms).slideY(begin: 0.3, end: 0),
+                      const Spacer(),
+                      Obx(() {
+                        final saved = controller.auth.offlineUser.value;
+                        final loading = controller.isLoading.value;
+                        final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(18));
+                        Widget microsoft(Color spinner) => loading
+                            ? SizedBox.square(
+                                dimension: 22,
+                                child: CircularProgressIndicator(strokeWidth: 2.4, color: spinner),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const _MicrosoftLogo(),
+                                  const SizedBox(width: 12),
+                                  Text(saved == null ? 'Continue with Microsoft' : 'Sign in with Microsoft'),
+                                ],
+                              );
+
+                        if (saved == null) {
+                          return SizedBox(
+                            width: double.infinity,
+                            height: 56,
+                            child: FilledButton(
+                              style: FilledButton.styleFrom(shape: shape),
+                              onPressed: loading ? null : controller.signIn,
+                              child: microsoft(Colors.white),
+                            ),
+                          );
+                        }
+                        return Column(
+                          children: [
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: FilledButton(
+                                style: FilledButton.styleFrom(shape: shape),
+                                onPressed: loading ? null : controller.continueOffline,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(Icons.lock_open_rounded, size: 20),
+                                    const SizedBox(width: 10),
+                                    Text('Continue offline as ${saved.name.split(' ').first}'),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              width: double.infinity,
+                              height: 56,
+                              child: OutlinedButton(
+                                style: OutlinedButton.styleFrom(shape: shape),
+                                onPressed: loading ? null : controller.signIn,
+                                child: microsoft(scheme.primary),
+                              ),
+                            ),
+                          ],
+                        );
+                      }).animate().fadeIn(delay: 550.ms).slideY(begin: 0.3, end: 0),
                       const SizedBox(height: 14),
                       Center(
                         child: Text(

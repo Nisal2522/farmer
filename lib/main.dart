@@ -35,11 +35,14 @@ void _registerDependencies() {
   Get.lazyPut(() => ApiClient(), fenix: true);
 
   // Swap MockAuditRepository for the real API implementation here.
-  if (AppConfig.useMockData) {
-    Get.put<AuditRepository>(MockAuditRepository(), permanent: true);
+  final mock = AppConfig.useMockData ? MockAuditRepository() : null;
+  if (mock != null) {
+    Get.put<AuditRepository>(mock, permanent: true);
   }
 
-  Get.put(SyncService(), permanent: true);
+  final sync = Get.put(SyncService(), permanent: true);
+  // Sample data ships with a few offline records waiting to upload.
+  if (mock != null) sync.enqueue(mock.unsyncedCount);
 }
 
 class CuFarmerApp extends StatelessWidget {

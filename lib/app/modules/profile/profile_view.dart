@@ -105,19 +105,6 @@ class ProfileView extends GetView<ProfileController> {
             ),
           ),
           const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(
-                foregroundColor: scheme.error,
-                side: BorderSide(color: scheme.error.withValues(alpha: 0.4)),
-              ),
-              onPressed: controller.signOut,
-              icon: const Icon(Icons.logout_rounded),
-              label: const Text('Sign out'),
-            ),
-          ),
-          const SizedBox(height: 16),
           Center(
             child: Text(
               '${AppConfig.appName} v${AppConfig.version}',
@@ -147,6 +134,7 @@ class _ProfileHero extends GetView<ProfileController> {
           Positioned.fill(
             child: DecoratedBox(decoration: BoxDecoration(color: AppColors.primaryDeep.withValues(alpha: 0.7))),
           ),
+          Positioned(top: top + 8, left: 12, child: const SectionBackButton(onPhoto: true)),
           Container(
             // Full width so the avatar, name and role are centred on any screen.
             width: double.infinity,

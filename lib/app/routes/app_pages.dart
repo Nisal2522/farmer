@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 
 import '../modules/audits/audits_controller.dart';
+import '../modules/audits/audits_view.dart';
 import '../modules/auth/login_controller.dart';
 import '../modules/auth/login_view.dart';
 import '../modules/farmer/farmer_changes_controller.dart';
@@ -29,12 +30,14 @@ import '../modules/photos/photos_view.dart';
 import '../modules/processing/processing_unit_controller.dart';
 import '../modules/processing/processing_unit_view.dart';
 import '../modules/profile/profile_controller.dart';
+import '../modules/profile/profile_view.dart';
 import '../modules/samples/sample_form_controller.dart';
 import '../modules/samples/sample_form_view.dart';
 import '../modules/samples/samples_controller.dart';
 import '../modules/samples/samples_view.dart';
 import '../modules/scanner/scanner_view.dart';
 import '../modules/schedule/schedule_controller.dart';
+import '../modules/schedule/schedule_view.dart';
 import '../modules/shell/shell_controller.dart';
 import '../modules/shell/shell_view.dart';
 import '../modules/sketch/sketch_controller.dart';
@@ -63,6 +66,10 @@ class AppPages {
           ..put(ProfileController());
       }),
     ),
+    // Sections opened from Home; controllers come from the shell binding above.
+    GetPage(name: Routes.audits, page: () => const SectionPage(child: AuditsView())),
+    GetPage(name: Routes.schedule, page: () => const SectionPage(child: ScheduleView())),
+    GetPage(name: Routes.profile, page: () => const SectionPage(child: ProfileView())),
     GetPage(
       name: Routes.projectUnits,
       page: () => const ProjectUnitsView(),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/status_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/app_card.dart';
 import '../../core/widgets/common.dart';
@@ -25,16 +24,18 @@ class AuditsView extends GetView<AuditsController> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 16, 4),
+                padding: const EdgeInsets.fromLTRB(8, 16, 16, 4),
                 child: Row(
                   children: [
+                    const SectionBackButton(),
+                    const SizedBox(width: 4),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text('My audits', style: Theme.of(context).textTheme.headlineMedium),
                           Obx(() {
-                            final up = controller.count(ProjectFilter.toUpload);
+                            final up = controller.toUploadCount;
                             return Text(
                               '${controller.projects.length} projects · ${up == 0 ? 'all uploaded' : '$up to upload'}',
                               style: TextStyle(color: scheme.onSurfaceVariant),
@@ -50,7 +51,7 @@ class AuditsView extends GetView<AuditsController> {
                               child: SizedBox.square(dimension: 22, child: CircularProgressIndicator(strokeWidth: 2.4)),
                             )
                           : IconButton.filled(
-                              tooltip: 'Upload changes',
+                              tooltip: 'Upload all changes',
                               iconSize: 22,
                               style: IconButton.styleFrom(padding: const EdgeInsets.all(12)),
                               onPressed: controller.sync.syncNow,
@@ -61,44 +62,18 @@ class AuditsView extends GetView<AuditsController> {
                 ),
               ),
             ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                child: TextField(
-                  onChanged: (v) => controller.query.value = v,
-                  decoration: InputDecoration(
-                    hintText: 'Search by project or audit no.',
-                    prefixIcon: const Icon(Icons.search_rounded),
-                    fillColor: scheme.surface,
-                  ),
-                ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Obx(
-                  () => PillTabs<ProjectFilter>(
-                    values: ProjectFilter.values,
-                    selected: controller.filter.value,
-                    label: (f) => '${_label(f)} ${controller.count(f)}',
-                    onChanged: (f) => controller.filter.value = f,
-                  ),
-                ),
-              ),
-            ),
             Obx(() {
               if (controller.isLoading.value) {
                 return const SliverFillRemaining(child: LoadingView());
               }
-              final items = controller.visible;
+              final items = controller.projects;
               if (items.isEmpty) {
                 return const SliverFillRemaining(
                   hasScrollBody: false,
                   child: EmptyState(
-                    icon: Icons.search_off_rounded,
-                    title: 'No audits found',
-                    message: 'Try a different search or filter.',
+                    icon: Icons.fact_check_outlined,
+                    title: 'No audits yet',
+                    message: 'Audits assigned to you will show up here.',
                   ),
                 );
               }
@@ -116,14 +91,10 @@ class AuditsView extends GetView<AuditsController> {
       ),
     );
   }
-
-  String _label(ProjectFilter f) => switch (f) {
-    ProjectFilter.all => 'All',
-    ProjectFilter.toUpload => 'To upload',
-    ProjectFilter.notDownloaded => 'To download',
-  };
 }
 
+/// Green project banner with a white strip underneath holding the
+/// upload / download icons.
 class _ProjectCard extends GetView<AuditsController> {
   const _ProjectCard(this.project);
 
@@ -131,18 +102,14 @@ class _ProjectCard extends GetView<AuditsController> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final gradient = AppColors.gradientFor(project.name);
     return AppCard(
       padding: EdgeInsets.zero,
       onTap: () => controller.open(project),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Colour banner
-          Container(
-            height: 92,
-            decoration: BoxDecoration(gradient: gradient),
+          Ink(
+            decoration: BoxDecoration(gradient: AppColors.gradientFor(project.name)),
             child: Stack(
               children: [
                 Positioned(
@@ -151,32 +118,24 @@ class _ProjectCard extends GetView<AuditsController> {
                   child: Icon(Icons.eco_rounded, size: 150, color: Colors.white.withValues(alpha: 0.08)),
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-                  child: Row(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              project.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 18,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${project.auditNo} · ${project.standard}',
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: 12),
-                            ),
-                          ],
+                      Text(
+                        project.name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          letterSpacing: -0.3,
                         ),
                       ),
-                      _SyncAction(project),
+                      const SizedBox(height: 4),
+                      Text(
+                        '${project.auditNo} · ${project.standard}',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.78), fontSize: 12),
+                      ),
                     ],
                   ),
                 ),
@@ -184,51 +143,36 @@ class _ProjectCard extends GetView<AuditsController> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
-            child: Row(
-              children: [
-                ProgressRing(value: project.progress, size: 54, stroke: 6, color: gradient.colors.last),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(
-                              text: '${project.auditedFarmers}',
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-                            ),
-                            TextSpan(
-                              text: ' / ${project.totalFarmers} farmers audited',
-                              style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          StatusPill(
-                            project.syncState.label,
-                            color: project.syncState.color,
-                            icon: project.syncState.icon,
-                            dense: true,
-                          ),
-                          const Spacer(),
-                          if (project.lastSynced != null)
-                            Text(
-                              Fmt.relative(project.lastSynced!),
-                              style: TextStyle(color: scheme.outline, fontSize: 12),
-                            ),
-                        ],
-                      ),
-                    ],
+            padding: const EdgeInsets.fromLTRB(16, 10, 14, 10),
+            child: Obx(() {
+              final toUpload = project.syncState == SyncState.pendingUpload;
+              final toDownload = project.syncState == SyncState.notDownloaded;
+              final uploading = toUpload && controller.sync.isSyncing.value;
+              final downloading = controller.downloading.contains(project.id);
+              return Row(
+                children: [
+                  Expanded(
+                    child: _SyncStatus(project: project, uploading: uploading, downloading: downloading),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  _SyncIcon(
+                    icon: Icons.upload_rounded,
+                    tooltip: toUpload ? 'Upload changes' : 'Nothing to upload',
+                    active: toUpload,
+                    busy: uploading,
+                    onTap: controller.sync.syncNow,
+                  ),
+                  const SizedBox(width: 10),
+                  _SyncIcon(
+                    icon: Icons.download_rounded,
+                    tooltip: toDownload ? 'Download for offline use' : 'Already downloaded',
+                    active: toDownload,
+                    busy: downloading,
+                    onTap: () => controller.download(project),
+                  ),
+                ],
+              );
+            }),
           ),
         ],
       ),
@@ -236,41 +180,120 @@ class _ProjectCard extends GetView<AuditsController> {
   }
 }
 
-class _SyncAction extends GetView<AuditsController> {
-  const _SyncAction(this.project);
+/// Sync status on the left of the white strip: coloured dot, state and one
+/// line of detail.
+class _SyncStatus extends StatelessWidget {
+  const _SyncStatus({required this.project, required this.uploading, required this.downloading});
 
   final AuditProject project;
+  final bool uploading;
+  final bool downloading;
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      if (controller.downloading.contains(project.id)) {
-        return const Padding(
-          padding: EdgeInsets.all(10),
-          child: SizedBox.square(
-            dimension: 20,
-            child: CircularProgressIndicator(strokeWidth: 2.2, color: Colors.white),
+    final scheme = Theme.of(context).colorScheme;
+    final last = project.lastSynced;
+    final (Color color, String title, String detail) = switch (project.syncState) {
+      _ when downloading => (AppColors.info, 'Downloading…', 'Getting farmers and units'),
+      _ when uploading => (AppColors.amberDeep, 'Uploading…', 'Sending your changes'),
+      SyncState.pendingUpload => (
+        AppColors.amberDeep,
+        'Changes to upload',
+        last == null ? 'Not synced yet' : 'Last synced ${Fmt.relative(last)}',
+      ),
+      SyncState.notDownloaded => (
+        AppColors.info,
+        'Not downloaded',
+        project.totalFarmers == 0 ? 'Download to audit offline' : '${project.totalFarmers} farmers · download to start',
+      ),
+      SyncState.synced => (
+        AppColors.success,
+        'Ready offline',
+        last == null ? 'Up to date' : 'Synced ${Fmt.relative(last)}',
+      ),
+    };
+    return Row(
+      children: [
+        Container(
+          width: 10,
+          height: 10,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            boxShadow: [BoxShadow(color: color.withValues(alpha: 0.35), blurRadius: 0, spreadRadius: 3)],
           ),
-        );
-      }
-      final (icon, tip, action) = switch (project.syncState) {
-        SyncState.notDownloaded => (
-          Icons.download_rounded,
-          'Download for offline use',
-          () => controller.download(project),
         ),
-        SyncState.pendingUpload => (Icons.upload_rounded, 'Upload changes', controller.sync.syncNow),
-        SyncState.synced => (Icons.offline_pin_rounded, 'Ready offline', null),
-      };
-      return IconButton(
-        tooltip: tip,
-        onPressed: action,
-        style: IconButton.styleFrom(
-          backgroundColor: Colors.white.withValues(alpha: 0.18),
-          disabledBackgroundColor: Colors.white.withValues(alpha: 0.12),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: color),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                detail,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 12, color: scheme.onSurfaceVariant),
+              ),
+            ],
+          ),
         ),
-        icon: Icon(icon, color: Colors.white),
-      );
-    });
+      ],
+    );
+  }
+}
+
+/// Round amber icon button. Solid when there is something to do; faded and
+/// disabled when not.
+class _SyncIcon extends StatelessWidget {
+  const _SyncIcon({
+    required this.icon,
+    required this.tooltip,
+    required this.active,
+    required this.busy,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool active;
+  final bool busy;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = active || busy;
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: on ? AppColors.amber : AppColors.amber.withValues(alpha: 0.16),
+        shape: CircleBorder(side: BorderSide(color: AppColors.amber.withValues(alpha: on ? 0 : 0.45))),
+        elevation: on ? 3 : 0,
+        shadowColor: AppColors.amber.withValues(alpha: 0.5),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: active && !busy ? onTap : null,
+          child: SizedBox.square(
+            dimension: 44,
+            child: busy
+                ? const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircularProgressIndicator(strokeWidth: 2.4, color: AppColors.primaryDeep),
+                  )
+                : Icon(
+                    icon,
+                    size: 22,
+                    color: on ? AppColors.primaryDeep : AppColors.amber.withValues(alpha: 0.7),
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 }
