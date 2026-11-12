@@ -111,6 +111,14 @@ class ProfileView extends GetView<ProfileController> {
               style: TextStyle(color: scheme.outline, fontSize: 12),
             ),
           ),
+          const SizedBox(height: 4),
+          // Licence credit for the header photo used across the app (CC BY 4.0).
+          Center(
+            child: Text(
+              'Photo: Vyacheslav Argenberg · CC BY 4.0',
+              style: TextStyle(color: scheme.outline, fontSize: 10.5),
+            ),
+          ),
         ],
       ),
     );

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../data/models/models.dart';
 import '../../data/repositories/audit_repository.dart';
 import '../../routes/app_routes.dart';
+import 'note_editor_controller.dart' show NoteEditorResult;
 import 'widgets/category_picker_sheet.dart';
 
 class NotesController extends GetxController {
@@ -37,12 +38,16 @@ class NotesController extends GetxController {
   int count(NoteType? type) => type == null ? notes.length : notes.where((n) => n.type == type).length;
 
   Future<void> addNote() async {
-    final picked = await CategoryPickerSheet.show(categories);
-    if (picked == null) return;
-    final saved = await Get.toNamed(
-      Routes.noteEditor,
-      arguments: {'subject': subject, 'category': picked.category, 'subCategory': picked.subCategory},
-    );
-    if (saved == true) load();
+    while (true) {
+      final picked = await CategoryPickerSheet.show(categories);
+      if (picked == null) return;
+      final result = await Get.toNamed(
+        Routes.noteEditor,
+        arguments: {'subject': subject, 'category': picked.category, 'subCategory': picked.subCategory},
+      );
+      if (result == true) load();
+      // "Select Note Category" on the editor goes back to the picker.
+      if (result != NoteEditorResult.changeCategory) return;
+    }
   }
 }

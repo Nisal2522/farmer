@@ -80,7 +80,8 @@ class MockAuditRepository implements AuditRepository {
         category: 'Soil inputs',
         subCategory: 'Input storage',
         type: NoteType.nonConformity,
-        text: 'Bag of synthetic urea found in the store room. Farmer says it belongs to a neighbour; '
+        text:
+            'Bag of synthetic urea found in the store room. Farmer says it belongs to a neighbour; '
             'storage to be separated and checked at the next visit.',
         createdAt: now.subtract(const Duration(hours: 2)),
       ),
@@ -248,6 +249,40 @@ class MockAuditRepository implements AuditRepository {
 
   @override
   Future<Farmer> getFarmer(String id) => _delay(_hydrate(_farmers.firstWhere((f) => f.id == id)));
+
+  @override
+  Future<String> fetchOsp(String subjectId) {
+    String list(List<String> items) => switch (items.length) {
+      0 => '',
+      1 => items.first,
+      _ => '${items.sublist(0, items.length - 1).join(', ')} and ${items.last}',
+    };
+    final farmer = _farmers.where((f) => f.id == subjectId).firstOrNull;
+    if (farmer != null) {
+      final f = farmer;
+      final conversion = f.conversionDate == null
+          ? ''
+          : ', after converting from conventional farming in ${f.conversionDate!.year}';
+      return _delay(
+        '${f.name} (farmer code ${f.code}, plot ${f.plot}) manages ${f.totalAreaHa.toStringAsFixed(2)} ha '
+        'at ${f.address} under ${list(f.certifications)} organic certification since ${f.certificationDate.year}'
+        '$conversion. The main crops are ${list(f.crops.map((c) => c.name).toList())}. '
+        'Only organic inputs are used: compost and cattle manure produced on the farm, with no synthetic '
+        'fertilisers or pesticides. Weeds and pests are controlled by hand weeding, mulching and neem-based '
+        'sprays. A strip of natural vegetation separates the plot from neighbouring conventional land, and '
+        'harvest, input and sales records are kept in the farm record book. Field status is ${f.fieldStatus} '
+        'and harvest status is ${f.harvestStatus}.',
+      );
+    }
+    final u = _processing.firstWhere((u) => u.id == subjectId);
+    return _delay(
+      '${u.name} (CUID ${u.cuid}) at ${u.address} processes ${list(u.products)}. Organic raw material is '
+      'received only from certified growers of this project and is kept separate from conventional produce, '
+      'with clear labels at every stage. Equipment is cleaned before each organic batch and the cleaning is '
+      'recorded. Pest control uses traps and physical barriers only, and batch records link every lot back '
+      'to the farmers who supplied it.',
+    );
+  }
 
   @override
   Future<Farmer> setFarmerFlags(String id, {bool? audited, bool? selected}) {

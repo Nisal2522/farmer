@@ -40,7 +40,7 @@ class LoginView extends GetView<LoginController> {
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            AppColors.primaryDeep.withValues(alpha: 0.55),
+                            AppColors.primaryDeep.withValues(alpha: 0.65),
                             AppColors.primaryDeep.withValues(alpha: 0.15),
                             AppColors.primaryDeep.withValues(alpha: 0.85),
                           ],
@@ -50,33 +50,34 @@ class LoginView extends GetView<LoginController> {
                     ),
                     SafeArea(
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(28, 20, 28, 30),
+                        padding: const EdgeInsets.fromLTRB(24, 16, 24, 34),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const _BrandLockup().animate().fadeIn(duration: 300.ms),
                             const Spacer(),
                             const Text(
-                              'Audit farms\nanywhere,\neven offline',
+                              'Field audits,\nsimplified.',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 30,
-                                height: 1.15,
+                                fontSize: 32,
+                                height: 1.12,
                                 fontWeight: FontWeight.w800,
-                                letterSpacing: -0.6,
+                                letterSpacing: -0.8,
                                 shadows: [Shadow(color: Color(0x55000000), blurRadius: 16)],
                               ),
                             ).animate().fadeIn(delay: 80.ms, duration: 350.ms).slideY(begin: 0.2, end: 0),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Plan inspections, record evidence and sync your work, even without signal.',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontSize: 14.5,
+                                height: 1.4,
+                              ),
+                            ).animate().fadeIn(delay: 120.ms, duration: 350.ms),
                           ],
                         ),
-                      ),
-                    ),
-                    // Licence attribution for the photo (CC BY 4.0).
-                    Positioned(
-                      right: 16,
-                      bottom: 10,
-                      child: Text(
-                        'Photo: Vyacheslav Argenberg · CC BY 4.0',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.55), fontSize: 9),
                       ),
                     ),
                   ],
@@ -98,15 +99,15 @@ class LoginView extends GetView<LoginController> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              saved == null ? 'Welcome, auditor' : 'Welcome back, ${saved.name.split(' ').first}',
+                              saved == null ? 'Sign in' : 'Welcome back, ${saved.name.split(' ').first}',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               saved == null
-                                  ? 'Sign in with your company Microsoft account to load your audit schedule.'
-                                  : 'Your account and audit data are saved on this device. '
-                                        'Continue offline, or sign in with Microsoft when you are online.',
+                                  ? "Use your organisation's Microsoft account to access your assigned audits and schedule."
+                                  : 'Your account and audit data are stored on this device. '
+                                        'Continue offline, or sign in with Microsoft to sync your latest changes.',
                               style: TextStyle(color: scheme.onSurfaceVariant, height: 1.45),
                             ),
                           ],
@@ -127,7 +128,7 @@ class LoginView extends GetView<LoginController> {
                                 children: [
                                   const _MicrosoftLogo(),
                                   const SizedBox(width: 12),
-                                  Text(saved == null ? 'Continue with Microsoft' : 'Sign in with Microsoft'),
+                                  const Text('Sign in with Microsoft'),
                                 ],
                               );
 
@@ -176,7 +177,7 @@ class LoginView extends GetView<LoginController> {
                       const SizedBox(height: 14),
                       Center(
                         child: Text(
-                          'Trouble signing in? Contact your auditor department.',
+                          'Need help signing in? Contact your audit coordinator.',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
                         ),
@@ -184,7 +185,7 @@ class LoginView extends GetView<LoginController> {
                       const SizedBox(height: 6),
                       Center(
                         child: Text(
-                          '${AppConfig.appName} v${AppConfig.version}',
+                          'Version ${AppConfig.version}',
                           style: TextStyle(color: scheme.outline, fontSize: 12),
                         ),
                       ),
@@ -222,6 +223,52 @@ class _MicrosoftLogo extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// App logo and name, top-left of the hero (as most apps place their brand).
+class _BrandLockup extends StatelessWidget {
+  const _BrandLockup();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4)),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset('assets/images/logo.png', width: 42, height: 42, filterQuality: FilterQuality.medium),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              AppConfig.appName,
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800, letterSpacing: -0.2),
+            ),
+            Text(
+              'FIELD AUDIT',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.75),
+                fontSize: 10.5,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

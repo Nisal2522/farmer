@@ -21,6 +21,9 @@ abstract class AuditRepository {
   // Farmers
   Future<List<Farmer>> fetchFarmers(String projectId, String unitCode);
   Future<Farmer> getFarmer(String id);
+
+  /// Organic System Plan summary for a farmer or processing unit (a paragraph).
+  Future<String> fetchOsp(String subjectId);
   Future<Farmer> setFarmerFlags(String id, {bool? audited, bool? selected});
 
   // Field records (shared by farmers and processing units)
