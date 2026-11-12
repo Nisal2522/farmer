@@ -30,7 +30,7 @@ class HomeView extends GetView<HomeController> {
             const SliverToBoxAdapter(child: _Header()),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              sliver: SliverToBoxAdapter(child: const _Overview().entrance(0)),
+              sliver: const SliverToBoxAdapter(child: _HomeMenu()),
             ),
             const SliverToBoxAdapter(child: SectionHeader('Up next')),
             SliverToBoxAdapter(
@@ -63,45 +63,6 @@ class HomeView extends GetView<HomeController> {
                     separatorBuilder: (_, _) => const SizedBox(width: 12),
                     itemBuilder: (_, i) => _ProjectCard(controller.activeProjects[i]).entrance(i + 2, dy: 0.15),
                   ),
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(child: SectionHeader('Quick actions')),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Row(
-                  children: [
-                    _QuickAction(
-                      icon: Icons.beach_access_rounded,
-                      label: 'Leave',
-                      colors: AppColors.amberShades[0],
-                      onTap: () => Get.toNamed(Routes.leave),
-                    ),
-                    _QuickAction(
-                      icon: Icons.newspaper_rounded,
-                      label: 'News',
-                      colors: AppColors.amberShades[1],
-                      onTap: () => Get.toNamed(Routes.news),
-                    ),
-                    _QuickAction(
-                      icon: Icons.calendar_month_rounded,
-                      label: 'Calendar',
-                      colors: AppColors.amberShades[2],
-                      onTap: () => Get.find<ShellController>().changeTab(2),
-                    ),
-                    _QuickAction(
-                      icon: Icons.qr_code_scanner_rounded,
-                      label: 'Scan seal',
-                      colors: AppColors.amberShades[3],
-                      onTap: () async {
-                        final code = await Get.toNamed(Routes.scanner);
-                        if (code is String) {
-                          Get.snackbar('Seal scanned', code, snackPosition: SnackPosition.BOTTOM);
-                        }
-                      },
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -326,135 +287,254 @@ class _GlassIconButton extends StatelessWidget {
   }
 }
 
-/// Bento: a big progress tile next to two small stat tiles.
-class _Overview extends GetView<HomeController> {
-  const _Overview();
+/// Main menu at the top of Home: a featured "Audit Schedule" tile and a
+/// 2x2 grid. Each tile carries one line of live info so it reads at a glance.
+class _HomeMenu extends GetView<HomeController> {
+  const _HomeMenu();
+
+  static const _gap = 12.0;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final shell = Get.find<ShellController>();
     return Obx(() {
-      final total = controller.totalFarmers;
-      final done = controller.auditedFarmers;
-      final progress = total == 0 ? 0.0 : done / total;
-      return SizedBox(
-        height: 184,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 11,
-              child: AppCard(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Overall progress',
-                      style: TextStyle(color: scheme.onSurfaceVariant, fontWeight: FontWeight.w600, fontSize: 13),
-                    ),
-                    const Spacer(),
-                    Row(
-                      children: [
-                        ProgressRing(
-                          value: progress,
-                          size: 84,
-                          stroke: 10,
-                          labelStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '$done',
-                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, letterSpacing: -1),
-                              ),
-                              Text('of $total farmers', style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12)),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                  ],
-                ),
-              ),
+      final invites = controller.pendingInvites;
+      final active = controller.activeProjects.length;
+      final news = controller.news;
+      final latest = news.isEmpty ? null : news.map((n) => n.date).reduce((a, b) => a.isAfter(b) ? a : b);
+      final next = controller.nextAudit;
+
+      Widget row(Widget a, Widget b) => Row(
+        children: [
+          Expanded(child: a),
+          const SizedBox(width: _gap),
+          Expanded(child: b),
+        ],
+      );
+
+      return Column(
+        children: [
+          _FeaturedTile(
+            icon: Icons.event_note_rounded,
+            title: 'Audit Schedule',
+            subtitle: invites == 0 ? 'You are all caught up' : '$invites new invite${invites == 1 ? '' : 's'} to review',
+            badge: invites,
+            onTap: () => shell.changeTab(2),
+          ).entrance(0),
+          const SizedBox(height: _gap),
+          row(
+            _MenuTile(
+              icon: Icons.newspaper_rounded,
+              title: 'News',
+              subtitle: latest == null ? 'No updates yet' : 'Updated ${Fmt.relative(latest)}',
+              badge: news.length,
+              onTap: () => Get.toNamed(Routes.news),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              flex: 9,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.fact_check_rounded,
-                      value: '${controller.activeProjects.length}',
-                      label: 'Active audits',
-                      color: AppColors.primary,
-                      onTap: () => Get.find<ShellController>().changeTab(1),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: _MiniStat(
-                      icon: Icons.mark_email_unread_rounded,
-                      value: '${controller.pendingInvites}',
-                      label: 'New invites',
-                      color: AppColors.primary,
-                      onTap: () => Get.find<ShellController>().changeTab(2),
-                    ),
-                  ),
-                ],
-              ),
+            _MenuTile(
+              icon: Icons.fact_check_rounded,
+              title: 'My Audits',
+              subtitle: active == 0 ? 'No active audits' : '$active in progress',
+              onTap: () => shell.changeTab(1),
             ),
-          ],
-        ),
+          ).entrance(1),
+          const SizedBox(height: _gap),
+          row(
+            _MenuTile(
+              icon: Icons.share_location_rounded,
+              title: 'My Leave / Location',
+              subtitle: 'Time off & work place',
+              onTap: () => Get.toNamed(Routes.leave),
+            ),
+            _MenuTile(
+              icon: Icons.calendar_month_rounded,
+              title: 'My Calendar',
+              subtitle: next == null ? 'Nothing scheduled' : 'Next: ${Fmt.weekday(next.start)} ${next.start.day}',
+              onTap: () => shell.changeTab(2),
+            ),
+          ).entrance(2),
+        ],
       );
     });
   }
 }
 
-class _MiniStat extends StatelessWidget {
-  const _MiniStat({required this.icon, required this.value, required this.label, required this.color, this.onTap});
+/// Wide brand-green tile for the most important destination.
+class _FeaturedTile extends StatelessWidget {
+  const _FeaturedTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+    this.badge = 0,
+  });
 
   final IconData icon;
-  final String value;
-  final String label;
-  final Color color;
-  final VoidCallback? onTap;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final int badge;
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      onTap: onTap,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      child: Row(
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(12)),
-            child: Icon(icon, color: Colors.white, size: 20),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(color: AppColors.primaryDeep.withValues(alpha: 0.28), blurRadius: 18, offset: const Offset(0, 8)),
+        ],
+      ),
+      child: Material(
+        borderRadius: BorderRadius.circular(24),
+        clipBehavior: Clip.antiAlias,
+        child: Ink(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [AppColors.primaryDeep, AppColors.primary],
+            ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: InkWell(
+            onTap: onTap,
+            child: Stack(
               children: [
-                Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, height: 1.1)),
-                Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                const Positioned(right: -24, top: -36, child: _Ring(110, 0.07)),
+                const Positioned(right: 70, bottom: -50, child: _Ring(80, 0.05)),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 14, 16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.14),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                        ),
+                        child: Icon(icon, color: Colors.white, size: 24),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              subtitle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(color: Colors.white.withValues(alpha: 0.75), fontSize: 12.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (badge > 0) ...[
+                        _CountBadge(badge, color: AppColors.amber, textColor: AppColors.primaryDeep),
+                        const SizedBox(width: 10),
+                      ],
+                      Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.14), shape: BoxShape.circle),
+                        child: const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Compact grid tile: tinted icon, title and one line of live info.
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({required this.icon, required this.title, required this.subtitle, required this.onTap, this.badge = 0});
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  final int badge;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return AppCard(
+      onTap: onTap,
+      padding: const EdgeInsets.fromLTRB(14, 14, 12, 14),
+      child: SizedBox(
+        height: 92,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: scheme.primary.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, color: scheme.primary, size: 21),
+                ),
+                const Spacer(),
+                if (badge > 0) _CountBadge(badge, color: scheme.primary, textColor: scheme.onPrimary),
+              ],
+            ),
+            const Spacer(),
+            Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5, letterSpacing: -0.2),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: scheme.onSurfaceVariant, fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CountBadge extends StatelessWidget {
+  const _CountBadge(this.count, {required this.color, required this.textColor});
+
+  final int count;
+  final Color color;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: const BoxConstraints(minWidth: 26),
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(13)),
+      child: Text(
+        count > 99 ? '99+' : '$count',
+        style: TextStyle(color: textColor, fontSize: 12.5, fontWeight: FontWeight.w800),
       ),
     );
   }
@@ -696,46 +776,6 @@ class _Ring extends StatelessWidget {
       color: Colors.white.withValues(alpha: alpha),
     ),
   );
-}
-
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({required this.icon, required this.label, required this.colors, required this.onTap});
-
-  final IconData icon;
-  final String label;
-  final List<Color> colors;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          child: Column(
-            children: [
-              Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: colors),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(color: colors.last.withValues(alpha: 0.35), blurRadius: 14, offset: const Offset(0, 6)),
-                  ],
-                ),
-                child: Icon(icon, color: Colors.white, size: 26),
-              ),
-              const SizedBox(height: 8),
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _NewsRow extends StatelessWidget {
