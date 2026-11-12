@@ -33,6 +33,8 @@ abstract class AuditRepository {
   Future<FieldPhoto> savePhoto(FieldPhoto photo);
   Future<GeoPoint?> getLocation(String subjectId);
   Future<void> saveLocation(String subjectId, GeoPoint point);
+  Future<LandRecord> getLand(String subjectId);
+  Future<void> saveLand(String subjectId, LandRecord land);
 
   // Leave
   Future<List<LeaveRequest>> fetchLeaves();

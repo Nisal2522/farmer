@@ -19,6 +19,7 @@ class MockAuditRepository implements AuditRepository {
   final _samples = <FieldSample>[];
   final _photos = <FieldPhoto>[];
   final _locations = <String, GeoPoint>{};
+  final _lands = <String, LandRecord>{};
   final _dirtyProjects = <String>{};
 
   static const _latency = Duration(milliseconds: 350);
@@ -117,6 +118,26 @@ class MockAuditRepository implements AuditRepository {
       ),
     );
     _dirtyProjects.addAll({teaFarmer.projectId, valleyFarmer.projectId});
+
+    // A marked land boundary (1.83 ha near Rattota, Matale, matching the registered size) for the first
+    // farmer, so Point location opens with sample data.
+    _lands[first.id] = LandRecord(
+      boundary: const [
+        LandPoint(7.524752, 80.677639),
+        LandPoint(7.525413, 80.678420),
+        LandPoint(7.524892, 80.679158),
+        LandPoint(7.523992, 80.678870),
+        LandPoint(7.523901, 80.678012),
+      ],
+      comment: 'Boundary walked with the farmer. Eastern edge follows the stream.',
+      updatedAt: now.subtract(const Duration(days: 1)),
+    );
+    _locations[first.id] = GeoPoint(
+      lat: 7.524590,
+      lng: 80.678420,
+      accuracy: 6,
+      capturedAt: now.subtract(const Duration(days: 1)),
+    );
   }
 
   /// Records saved on the device that are not uploaded yet.
@@ -293,6 +314,16 @@ class MockAuditRepository implements AuditRepository {
   @override
   Future<void> saveLocation(String subjectId, GeoPoint point) {
     _locations[subjectId] = point;
+    _touch(subjectId);
+    return _delay(null);
+  }
+
+  @override
+  Future<LandRecord> getLand(String subjectId) => _delay(_lands[subjectId] ?? LandRecord.empty);
+
+  @override
+  Future<void> saveLand(String subjectId, LandRecord land) {
+    _lands[subjectId] = land.copyWith(updatedAt: DateTime.now());
     _touch(subjectId);
     return _delay(null);
   }

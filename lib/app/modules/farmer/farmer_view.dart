@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/utils/formatters.dart';
 import '../../core/widgets/action_tile.dart';
 import '../../core/widgets/common.dart';
@@ -49,7 +48,7 @@ class FarmerView extends GetView<FarmerController> {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
                 sliver: SliverList.list(
                   children: [
                     const SectionHeader('Audit workspace', padding: EdgeInsets.fromLTRB(4, 4, 4, 12)),
@@ -59,25 +58,6 @@ class FarmerView extends GetView<FarmerController> {
               ),
             ],
           ),
-        ),
-        bottomNavigationBar: BottomActionBar(
-          child: f.isAudited
-              ? OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(56),
-                    side: const BorderSide(color: AppColors.success),
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
-                  onPressed: controller.isUpdating.value ? null : controller.toggleAudited,
-                  icon: const Icon(Icons.check_circle_rounded, color: AppColors.success),
-                  label: const Text('Audited · tap to undo'),
-                )
-              : GradientButton(
-                  label: 'Mark as audited',
-                  icon: Icons.task_alt_rounded,
-                  loading: controller.isUpdating.value,
-                  onPressed: controller.toggleAudited,
-                ),
         ),
       );
     });

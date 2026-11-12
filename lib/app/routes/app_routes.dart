@@ -16,6 +16,7 @@ abstract class Routes {
 
   static const photos = '/photos';
   static const location = '/location';
+  static const mapEditor = '/location/map';
   static const notes = '/notes';
   static const noteEditor = '/notes/new';
   static const samples = '/samples';

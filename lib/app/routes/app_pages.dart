@@ -18,6 +18,8 @@ import '../modules/leave/leave_controller.dart';
 import '../modules/leave/leave_view.dart';
 import '../modules/location/location_controller.dart';
 import '../modules/location/location_view.dart';
+import '../modules/location/map_editor_controller.dart';
+import '../modules/location/map_editor_view.dart';
 import '../modules/news/news_controller.dart';
 import '../modules/news/news_detail_view.dart';
 import '../modules/news/news_view.dart';
@@ -105,6 +107,12 @@ class AppPages {
       name: Routes.location,
       page: () => const LocationView(),
       binding: BindingsBuilder.put(() => LocationController()),
+    ),
+    GetPage(
+      name: Routes.mapEditor,
+      page: () => const MapEditorView(),
+      binding: BindingsBuilder.put(() => MapEditorController()),
+      fullscreenDialog: true,
     ),
     GetPage(name: Routes.notes, page: () => const NotesView(), binding: BindingsBuilder.put(() => NotesController())),
     GetPage(
