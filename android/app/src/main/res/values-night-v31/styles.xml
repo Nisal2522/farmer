@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ always shows a system splash. Make it a plain screen in the
+         app's background colour (no icon), so the app appears to open straight
+         to the login page. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@color/launch_bg_dark</item>
+        <item name="android:windowSplashScreenBackground">@color/launch_bg_dark</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_blank</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">@color/launch_bg_dark</item>
+    </style>
+</resources>

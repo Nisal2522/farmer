@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#17603F</color>
+    <!-- Launch screen background: same light colour as the login page. -->
+    <color name="launch_bg">#F3F6F3</color>
+    <color name="launch_bg_dark">#0D1410</color>
 </resources>

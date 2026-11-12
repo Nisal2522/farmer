@@ -65,7 +65,7 @@ class LoginView extends GetView<LoginController> {
                                 letterSpacing: -0.6,
                                 shadows: [Shadow(color: Color(0x55000000), blurRadius: 16)],
                               ),
-                            ).animate().fadeIn(delay: 300.ms, duration: 500.ms).slideY(begin: 0.2, end: 0),
+                            ).animate().fadeIn(delay: 80.ms, duration: 350.ms).slideY(begin: 0.2, end: 0),
                           ],
                         ),
                       ),
@@ -111,7 +111,7 @@ class LoginView extends GetView<LoginController> {
                             ),
                           ],
                         );
-                      }).animate().fadeIn(delay: 350.ms).slideY(begin: 0.3, end: 0),
+                      }).animate().fadeIn(delay: 100.ms, duration: 300.ms).slideY(begin: 0.3, end: 0),
                       const Spacer(),
                       Obx(() {
                         final saved = controller.auth.offlineUser.value;
@@ -172,7 +172,7 @@ class LoginView extends GetView<LoginController> {
                             ),
                           ],
                         );
-                      }).animate().fadeIn(delay: 550.ms).slideY(begin: 0.3, end: 0),
+                      }).animate().fadeIn(delay: 160.ms, duration: 300.ms).slideY(begin: 0.3, end: 0),
                       const SizedBox(height: 14),
                       Center(
                         child: Text(
